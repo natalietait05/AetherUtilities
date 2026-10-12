@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "package": "com.aetheris.aetherutilities.client.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "InventorySorterScreenMixin",
+    "ScreenAccessor",
+    "AbstractRecipeBookScreenAccessor",
+    "ZoomCameraMixin",
+    "GammaOptionMixin",
+    "GammaOptionsMixin",
+    "HudMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
