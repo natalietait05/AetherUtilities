@@ -1,38 +1,30 @@
 {
-	"schemaVersion": 1,
-	"id": "aetherutils",
-	"version": "${version}",
-	"name": "AetherUtils",
-	"description": "Mix of mods for minecraft",
-	"authors": [
-		"Aetheris"
-	],
-	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
-	},
-	"license": "CC0-1.0",
-	"icon": "assets/aetherutils/icon.png",
-	"environment": "*",
-	"entrypoints": {
-		"main": [
-			"com.aetheris.aetherutils.AetherUtils"
-		],
-		"client": [
-			"com.aetheris.aetherutils.client.AetherUtilsClient"
-		]
-	},
-	"mixins": [
-		"aetherutils.mixins.json",
-		{
-			"config": "aetherutils.client.mixins.json",
-			"environment": "client"
-		}
-	],
-	"depends": {
-		"fabricloader": ">=0.19.5",
-		"minecraft": "~26.3",
-		"java": ">=25",
-		"fabric-api": "*"
-	}
+  "schemaVersion": 1,
+  "id": "aetherutilities",
+  "version": "${version}",
+  "name": "AetherUtilities",
+  "description": "Utility features for Minecraft: Zoom, Light Levels and Inventory Sorter.",
+  "authors": ["Aetheris"],
+  "contact": {
+    "sources": "https://github.com/natalietait05/AetherUtilities"
+  },
+  "license": "CC0-1.0",
+  "icon": "assets/aetherutilities/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.aetheris.aetherutilities.AetherUtilities"],
+    "client": ["com.aetheris.aetherutilities.client.AetherUtilitiesClient"]
+  },
+  "mixins": [
+    {
+      "config": "aetherutilities.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "~26.3",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
 }
