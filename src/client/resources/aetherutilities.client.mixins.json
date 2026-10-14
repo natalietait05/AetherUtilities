@@ -12,6 +12,7 @@
     "HudMixin",
     "MerchantMenuMixin",
     "MerchantScreenMixin",
+    "MerchantScreenScrollAccessor",
     "TradeOfferButtonMixin",
     "TradeOfferButtonAccessor"
   ],

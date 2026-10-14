@@ -34,6 +34,18 @@ public abstract class MerchantMenuMixin implements ClientMerchantMenuDuck {
     @Unique
     private int aetherutilities$combinedOffersScopeDepth;
 
+    @Override
+    public int aetherutilities$getOriginalOfferCount() {
+        return trader.getOffers().size();
+    }
+
+    @Override
+    public int aetherutilities$getCombinedOfferCount() {
+        return aetherutilities$combinedOffers == null
+                ? trader.getOffers().size()
+                : aetherutilities$combinedOffers.size();
+    }
+
     /*
      * Receives future trades from the server.
      */

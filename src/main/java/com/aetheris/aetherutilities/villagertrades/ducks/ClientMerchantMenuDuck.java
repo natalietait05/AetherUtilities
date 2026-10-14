@@ -8,6 +8,10 @@ import java.util.Optional;
 
 public interface ClientMerchantMenuDuck {
 
+    int aetherutilities$getOriginalOfferCount();
+
+    int aetherutilities$getCombinedOfferCount();
+
     void aetherutilities$setLockedTradeOffers(
             Optional<MerchantOffers> offers
     );
