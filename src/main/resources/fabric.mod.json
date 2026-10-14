@@ -17,6 +17,9 @@
   },
   "mixins": [
     {
+      "config": "aetherutilities.mixins.json"
+    },
+    {
       "config": "aetherutilities.client.mixins.json",
       "environment": "client"
     }

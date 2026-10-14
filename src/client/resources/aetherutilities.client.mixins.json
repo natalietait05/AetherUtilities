@@ -9,7 +9,11 @@
     "ZoomCameraMixin",
     "GammaOptionMixin",
     "GammaOptionsMixin",
-    "HudMixin"
+    "HudMixin",
+    "MerchantMenuMixin",
+    "MerchantScreenMixin",
+    "TradeOfferButtonMixin",
+    "TradeOfferButtonAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

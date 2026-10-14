@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.screens.Screen;
 import com.aetheris.aetherutilities.gamma.GammaClient;
+import com.aetheris.aetherutilities.villagertrades.LockedTradesClient;
 
 public final class AetherUtilitiesClient implements ClientModInitializer {
 
@@ -33,6 +34,7 @@ public final class AetherUtilitiesClient implements ClientModInitializer {
         ZoomClient.initialize();
         InventorySorterClient.initialize();
         GammaClient.initialize();
+        LockedTradesClient.initialize();
 
         AetherUtilitiesKeybindConfig.load();
 
