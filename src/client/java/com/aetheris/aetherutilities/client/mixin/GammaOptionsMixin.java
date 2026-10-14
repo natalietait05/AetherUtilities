@@ -1,6 +1,5 @@
 package com.aetheris.aetherutilities.client.mixin;
 
-import com.aetheris.aetherutilities.gamma.GammaClient;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.Options;
@@ -26,7 +25,7 @@ public abstract class GammaOptionsMixin {
             Operation<Void> original
     ) {
 
-        if (name.equals("gamma") && GammaClient.isEnabled()) {
+        if (name.equals("gamma")) {
             return;
         }
 

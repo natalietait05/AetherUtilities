@@ -29,8 +29,10 @@ public abstract class GammaOptionMixin<T> {
     private void aetherutilities$getGamma(
             CallbackInfoReturnable<Double> info
     ) {
-        if (isGammaOption() && GammaClient.isEnabled()) {
-            info.setReturnValue(2.0);
+        if (isGammaOption()) {
+            info.setReturnValue(
+                    GammaClient.getGammaValue()
+            );
         }
     }
 
@@ -43,7 +45,7 @@ public abstract class GammaOptionMixin<T> {
             T value,
             CallbackInfo info
     ) {
-        if (isGammaOption() && GammaClient.isEnabled()) {
+        if (isGammaOption()) {
             info.cancel();
         }
     }

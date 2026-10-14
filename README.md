@@ -7,6 +7,8 @@ A Fabric utility mod for Minecraft 26.3.
 - **Zoom** — configurable hold-to-zoom key and zoom strength.
 - **Light Levels** — displays block or sky light levels, with an adjustable scan radius.
 - **Inventory Sorter** — sorts inventories and provides quick store/retrieve controls, with configurable sort direction.
+- **Gamma** — increase brightness x3 and x15
+- **Villager Trades** — show next locked trades
 
 ## Development
 

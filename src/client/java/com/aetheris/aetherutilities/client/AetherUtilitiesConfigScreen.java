@@ -23,6 +23,7 @@ public final class AetherUtilitiesConfigScreen extends Screen {
     private Button lightLevelsKeyButton;
     private Button zoomKeyButton;
     private Button gammaKeyButton;
+    private Button gammaModeButton;
 
     private KeyMapping waitingForKey;
 
@@ -30,6 +31,25 @@ public final class AetherUtilitiesConfigScreen extends Screen {
         super(Component.literal("AetherUtilities"));
         this.parent = parent;
     }
+
+
+    private void updateGammaButton() {
+
+        if (gammaModeButton == null) {
+            return;
+        }
+
+        String modeText = switch (GammaClient.getMode()) {
+            case OFF -> "OFF";
+            case X3 -> "x3";
+            case X15 -> "x15";
+        };
+
+        gammaModeButton.setMessage(
+                Component.literal("Gamma: " + modeText)
+        );
+    }
+
 
     @Override
     protected void init() {
@@ -114,19 +134,24 @@ public final class AetherUtilitiesConfigScreen extends Screen {
                 )
         );
 
+
         // ============================================================
         // GAMMA
         // ============================================================
 
         int gammaY = startY + 120;
 
-        Button gammaLabel = this.addRenderableWidget(
-                Button.builder(Component.literal("Gamma"), button -> {})
-                        .bounds(leftX, gammaY, buttonWidth, 20)
+        gammaModeButton = this.addRenderableWidget(
+                Button.builder(
+                                Component.empty(),
+                                button -> {
+                                    GammaClient.nextMode();
+                                    updateGammaButton();
+                                }
+                        )
+                        .bounds(centerX - 100, gammaY, 200, 20)
                         .build()
         );
-
-        gammaLabel.active = false;
 
         gammaKeyButton = this.addRenderableWidget(
                 Button.builder(
@@ -136,9 +161,12 @@ public final class AetherUtilitiesConfigScreen extends Screen {
                                         button
                                 )
                         )
-                        .bounds(rightX, gammaY, buttonWidth, 20)
+                        .bounds(centerX - 100, gammaY + 25, 200, 20)
                         .build()
         );
+
+        updateGammaButton();
+
 
         // ============================================================
         // DONE
@@ -149,7 +177,7 @@ public final class AetherUtilitiesConfigScreen extends Screen {
                                 Component.literal("Done"),
                                 button -> onClose()
                         )
-                        .bounds(centerX - 100, startY + 165, 200, 20)
+                        .bounds(centerX - 100, startY + 190, 200, 20)
                         .build()
         );
     }
