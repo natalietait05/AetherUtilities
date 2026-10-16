@@ -8,7 +8,7 @@
   "contact": {
     "sources": "https://github.com/natalietait05/AetherUtilities"
   },
-  "license": "CC0-1.0",
+  "license": "MIT",
   "icon": "assets/aetherutilities/icon.png",
   "environment": "*",
   "entrypoints": {

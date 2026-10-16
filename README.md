@@ -146,6 +146,12 @@ AetherUtilities is developed using:
 - Fabric API
 - Fabric Loom
 - Gradle
+- 
+## License
+
+This project is licensed under the **MIT License**.
+
+See the [LICENSE](LICENSE) file for details.
 
 ### Building from Source
 
@@ -153,9 +159,3 @@ Clone the repository:
 
 ```bash
 git clone https://github.com/natalietait05/AetherUtilities.git
-
-## License
-
-This project is licensed under the **MIT License**.
-
-See the [LICENSE](LICENSE) file for details.
