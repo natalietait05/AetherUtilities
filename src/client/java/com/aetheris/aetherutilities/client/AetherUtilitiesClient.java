@@ -1,17 +1,22 @@
+
 package com.aetheris.aetherutilities.client;
 
 import com.aetheris.aetherutilities.AetherUtilities;
 import com.aetheris.aetherutilities.inventorysorter.InventorySorterClient;
 import com.aetheris.aetherutilities.lightlevels.LightLevelsClient;
 import com.aetheris.aetherutilities.zoom.ZoomClient;
+import com.aetheris.aetherutilities.gamma.GammaClient;
+import com.aetheris.aetherutilities.villagertrades.LockedTradesClient;
+import com.aetheris.aetherutilities.autorefill.AutoRefill;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.screens.Screen;
-import com.aetheris.aetherutilities.gamma.GammaClient;
-import com.aetheris.aetherutilities.villagertrades.LockedTradesClient;
+import com.aetheris.aetherutilities.autotool.AutoTool;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+
 
 public final class AetherUtilitiesClient implements ClientModInitializer {
 
@@ -20,7 +25,10 @@ public final class AetherUtilitiesClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        CATEGORY = KeyMapping.Category.register(AetherUtilities.id("controls"));
+
+        CATEGORY = KeyMapping.Category.register(
+                AetherUtilities.id("controls")
+        );
 
         CONFIG_KEY = KeyMappingHelper.registerKeyMapping(
                 new KeyMapping(
@@ -36,12 +44,21 @@ public final class AetherUtilitiesClient implements ClientModInitializer {
         GammaClient.initialize();
         LockedTradesClient.initialize();
 
+        ClientTickEvents.END_CLIENT_TICK.register(AutoTool::onClientTick);
+
         AetherUtilitiesKeybindConfig.load();
+        AutoFeaturesConfig.load();
+        AutoRefill.initialize();
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+
             while (CONFIG_KEY.consumeClick()) {
+
                 Screen parent = client.gui.screen();
-                client.gui.setScreen(new AetherUtilitiesConfigScreen(parent));
+
+                client.gui.setScreen(
+                        new AetherUtilitiesConfigScreen(parent)
+                );
             }
         });
     }

@@ -14,7 +14,9 @@
     "MerchantScreenMixin",
     "MerchantScreenScrollAccessor",
     "TradeOfferButtonMixin",
-    "TradeOfferButtonAccessor"
+    "TradeOfferButtonAccessor",
+    "AutoToolMixin",
+    "MinecraftStartAttackInvoker"
   ],
   "injectors": {
     "defaultRequire": 1

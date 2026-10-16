@@ -1,3 +1,4 @@
+
 package com.aetheris.aetherutilities.client;
 
 import com.aetheris.aetherutilities.gamma.GammaClient;
@@ -25,6 +26,9 @@ public final class AetherUtilitiesConfigScreen extends Screen {
     private Button gammaKeyButton;
     private Button gammaModeButton;
 
+    private Button autoRefillButton;
+    private Button autoToolButton;
+
     private KeyMapping waitingForKey;
 
     public AetherUtilitiesConfigScreen(Screen parent) {
@@ -32,6 +36,9 @@ public final class AetherUtilitiesConfigScreen extends Screen {
         this.parent = parent;
     }
 
+    // ============================================================
+    // BUTTON UPDATES
+    // ============================================================
 
     private void updateGammaButton() {
 
@@ -50,6 +57,41 @@ public final class AetherUtilitiesConfigScreen extends Screen {
         );
     }
 
+    private void updateAutoRefillButton() {
+
+        if (autoRefillButton == null) {
+            return;
+        }
+
+        autoRefillButton.setMessage(
+                Component.literal(
+                        "Auto Refill: "
+                                + (AutoFeaturesConfig.isAutoRefillEnabled()
+                                ? "ON"
+                                : "OFF")
+                )
+        );
+    }
+
+    private void updateAutoToolButton() {
+
+        if (autoToolButton == null) {
+            return;
+        }
+
+        autoToolButton.setMessage(
+                Component.literal(
+                        "Auto Tool: "
+                                + (AutoFeaturesConfig.isAutoToolEnabled()
+                                ? "ON"
+                                : "OFF")
+                )
+        );
+    }
+
+    // ============================================================
+    // INIT
+    // ============================================================
 
     @Override
     protected void init() {
@@ -64,9 +106,9 @@ public final class AetherUtilitiesConfigScreen extends Screen {
 
         int startY = 50;
 
-        // ============================================================
+        // ========================================================
         // LIGHT LEVELS
-        // ============================================================
+        // ========================================================
 
         Button lightLevelsLabel = this.addRenderableWidget(
                 Button.builder(Component.literal("Light Levels"), button -> {})
@@ -98,9 +140,9 @@ public final class AetherUtilitiesConfigScreen extends Screen {
                 )
         );
 
-        // ============================================================
+        // ========================================================
         // ZOOM
-        // ============================================================
+        // ========================================================
 
         int zoomY = startY + 60;
 
@@ -134,10 +176,9 @@ public final class AetherUtilitiesConfigScreen extends Screen {
                 )
         );
 
-
-        // ============================================================
+        // ========================================================
         // GAMMA
-        // ============================================================
+        // ========================================================
 
         int gammaY = startY + 120;
 
@@ -167,17 +208,66 @@ public final class AetherUtilitiesConfigScreen extends Screen {
 
         updateGammaButton();
 
+        // ========================================================
+        // AUTO FEATURES
+        // ========================================================
 
-        // ============================================================
+        int autoY = startY + 165;
+        int autoButtonWidth = 140;
+
+        autoRefillButton = this.addRenderableWidget(
+                Button.builder(
+                                Component.empty(),
+                                button -> {
+                                    AutoFeaturesConfig.setAutoRefillEnabled(
+                                            !AutoFeaturesConfig.isAutoRefillEnabled()
+                                    );
+
+                                    updateAutoRefillButton();
+                                }
+                        )
+                        .bounds(
+                                centerX - autoButtonWidth - 4,
+                                autoY,
+                                autoButtonWidth,
+                                20
+                        )
+                        .build()
+        );
+
+        autoToolButton = this.addRenderableWidget(
+                Button.builder(
+                                Component.empty(),
+                                button -> {
+                                    AutoFeaturesConfig.setAutoToolEnabled(
+                                            !AutoFeaturesConfig.isAutoToolEnabled()
+                                    );
+
+                                    updateAutoToolButton();
+                                }
+                        )
+                        .bounds(
+                                centerX + 4,
+                                autoY,
+                                autoButtonWidth,
+                                20
+                        )
+                        .build()
+        );
+
+        updateAutoRefillButton();
+        updateAutoToolButton();
+
+        // ========================================================
         // DONE
-        // ============================================================
+        // ========================================================
 
         this.addRenderableWidget(
                 Button.builder(
                                 Component.literal("Done"),
                                 button -> onClose()
                         )
-                        .bounds(centerX - 100, startY + 190, 200, 20)
+                        .bounds(centerX - 100, startY + 200, 200, 20)
                         .build()
         );
     }
