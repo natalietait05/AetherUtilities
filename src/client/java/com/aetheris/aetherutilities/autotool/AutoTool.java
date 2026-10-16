@@ -167,7 +167,7 @@ public final class AutoTool {
                 .getKey(state.getBlock())
                 .getPath();
 
-        return blockId.contains("bamboo");
+        return blockId.equals("bamboo");
     }
 
     private static boolean moveToolToHotbar(

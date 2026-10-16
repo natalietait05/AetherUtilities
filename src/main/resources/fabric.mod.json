@@ -3,7 +3,7 @@
   "id": "aetherutilities",
   "version": "${version}",
   "name": "AetherUtilities",
-  "description": "Utility features for Minecraft: Zoom, Light Levels and Inventory Sorter.",
+  "description": "A collection of client-side utility features.",
   "authors": ["Aetheris"],
   "contact": {
     "sources": "https://github.com/natalietait05/AetherUtilities"
