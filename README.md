@@ -2,7 +2,7 @@
 
 A client-side utility mod for **Minecraft 26.3**, built with Fabric.
 
-AetherUtilities brings together useful quality-of-life features designed to improve inventory management, gameplay convenience, visibility, and interaction with the Minecraft world.
+AetherUtilities combines quality-of-life features designed to improve gameplay convenience, inventory management, visibility, navigation, and interaction with the Minecraft world.
 
 ## Features
 
@@ -14,8 +14,8 @@ Automatically selects the most suitable tool when attacking a block.
 - Searches the hotbar first, from left to right.
 - If no suitable tool is found, searches the main inventory.
 - If the tool is in the main inventory:
-    - Moves it to the first available empty hotbar slot.
-    - If the hotbar is full, replaces the currently selected slot.
+  - Moves it to the first available empty hotbar slot.
+  - If the hotbar is full, replaces the currently selected slot.
 - Prioritizes swords when targeting bamboo blocks and bamboo variants.
 - Automatically retries the initial attack when switching to a sword for bamboo.
 - Can be enabled or disabled independently.
@@ -39,12 +39,12 @@ Organizes inventories and simplifies item transfers.
 - Sorts items alphabetically by name.
 - Supports ascending (A → Z) and descending (Z → A) sorting.
 - Automatically stacks compatible item stacks before sorting.
-- Provides quick inventory management buttons:
-    - **Sort:** Sorts the available inventory.
-    - **Store Existing:** Transfers items that already exist in the destination inventory.
-    - **Store All:** Transfers all possible items to the destination inventory.
-    - **Retrieve Existing:** Retrieves items that already exist in the player's inventory.
-    - **Retrieve All:** Retrieves all possible items.
+- Provides inventory management actions:
+  - **Sort:** Sorts the available inventory.
+  - **Store Existing:** Transfers items that already exist in the destination inventory.
+  - **Store All:** Transfers all possible items to the destination inventory.
+  - **Retrieve Existing:** Retrieves items that already exist in the player's inventory.
+  - **Retrieve All:** Retrieves all possible items.
 - Includes a configuration button for sorting preferences.
 
 ### Light Levels
@@ -54,9 +54,9 @@ Displays light level information around the player.
 - Displays block light levels.
 - Displays sky light levels.
 - Three operating modes:
-    - OFF
-    - BLOCK LIGHT
-    - SKY LIGHT
+  - OFF
+  - BLOCK LIGHT
+  - SKY LIGHT
 - Configurable scan radius.
 - Updates automatically as the player moves.
 
@@ -74,52 +74,81 @@ Provides additional brightness control.
 
 Three brightness modes:
 
-- OFF — Normal brightness.
-- x3 — Increased brightness.
-- x15 — Maximum brightness.
+- **OFF:** Normal brightness.
+- **x3:** Increased brightness.
+- **x15:** Maximum brightness.
 
 Cycles through the available modes using a configurable key.
 
 ### Villager Trades
 
-Displays additional locked villager trades.
+Displays locked villager trades before they are unlocked.
 
-- Shows upcoming locked trades in the villager trading interface.
-- Allows players to preview future trades without unlocking them first.
+- Shows upcoming trades in the villager trading interface.
+- Allows players to preview trades from future villager levels.
 - Keeps locked trade offers visually distinguishable from available trades.
 
----
+### AetherNavigation
+
+A waypoint management system with two independent visualization options.
+
+#### Floating Waypoints
+
+- Displays waypoint markers directly in the world.
+- Uses configurable waypoint colors.
+- Shows the waypoint name and distance when looking towards it.
+- Keeps colored markers visible even when not looking directly at them.
+- Automatically adjusts marker scale based on viewing distance.
+- Supports waypoints up to 256 blocks away.
+
+#### Locator Bar Integration
+
+- Displays custom waypoints in Minecraft's native Locator Bar.
+- Uses each waypoint's configured color.
+- Synchronizes waypoint visibility with the Locator Bar.
+- Can be enabled or disabled independently of floating markers.
+
+#### Waypoint Management
+
+- Create, edit, and delete waypoints.
+- Configure waypoint names, coordinates, dimensions, and colors.
+- Automatically detects the player's current dimension.
+- Includes a Set Here option to use the player's current position.
+- Enable or disable individual waypoints.
+- Supports multiple waypoints with a paginated management screen.
+- Long waypoint names are automatically shortened in the list while keeping coordinates visible.
+- Waypoint data is saved locally and persists between game sessions.
 
 ## Configuration
 
-AetherUtilities includes its own configuration screen.
+AetherUtilities includes a centralized configuration screen.
 
-Press **K** (default key) to open the AetherUtilities configuration menu.
+Press **K** (default key) to open the main configuration menu.
 
-Available settings:
+The configuration screen provides access to:
 
 | Feature | Configuration |
 |---|---|
 | Auto Tool | Enable / Disable |
 | Auto Refill | Enable / Disable |
-| Light Levels | Keybind and scan radius |
+| Light Levels | Keybind and detection radius |
 | Zoom | Keybind and zoom strength |
 | Gamma | Keybind and brightness mode |
+| Navigation | Keybind and Navigation Menu |
 
-Inventory Sorter has its own settings button inside the inventory interface.
+The Navigation Menu provides access to waypoint management and independent controls for Floating Waypoints and Locator Bar integration.
 
 ### Default Keybinds
 
 | Action | Default Key |
 |---|---|
 | AetherUtilities Config | K |
+| Navigation Menu | M |
 | Light Levels | L |
 | Zoom | C |
 | Gamma | G |
 
-Keybinds can be changed through Minecraft's Controls settings or the AetherUtilities configuration screen, where supported.
-
----
+Keybinds can be changed through Minecraft's Controls settings or the AetherUtilities configuration screen.
 
 ## Requirements
 
@@ -146,12 +175,6 @@ AetherUtilities is developed using:
 - Fabric API
 - Fabric Loom
 - Gradle
-- 
-## License
-
-This project is licensed under the **MIT License**.
-
-See the [LICENSE](LICENSE) file for details.
 
 ### Building from Source
 
@@ -159,3 +182,29 @@ Clone the repository:
 
 ```bash
 git clone https://github.com/natalietait05/AetherUtilities.git
+cd AetherUtilities
+```
+
+Build the mod:
+
+**Windows:**
+```powershell
+.\gradlew.bat build
+```
+
+**Linux / macOS:**
+```bash
+./gradlew build
+```
+
+The compiled JAR files will be available in:
+
+```text
+build/libs/
+```
+
+## License
+
+This project is licensed under the **MIT License**.
+
+See the [LICENSE](LICENSE) file for details.

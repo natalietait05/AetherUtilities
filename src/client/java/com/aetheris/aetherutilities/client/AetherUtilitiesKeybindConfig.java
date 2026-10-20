@@ -2,6 +2,7 @@ package com.aetheris.aetherutilities.client;
 
 import com.aetheris.aetherutilities.gamma.GammaClient;
 import com.aetheris.aetherutilities.lightlevels.LightLevelsClient;
+import com.aetheris.aetherutilities.navigation.NavigationClient;
 import com.aetheris.aetherutilities.zoom.ZoomClient;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.loader.api.FabricLoader;
@@ -19,6 +20,7 @@ public final class AetherUtilitiesKeybindConfig {
     private static final String LIGHT_LEVELS_KEY = "light_levels";
     private static final String ZOOM_KEY = "zoom";
     private static final String GAMMA_KEY = "gamma";
+    private static final String NAVIGATION_KEY = "navigation";
 
     private AetherUtilitiesKeybindConfig() {
     }
@@ -57,6 +59,12 @@ public final class AetherUtilitiesKeybindConfig {
                     properties,
                     GAMMA_KEY,
                     GammaClient.TOGGLE_KEY
+            );
+
+            loadKey(
+                    properties,
+                    NAVIGATION_KEY,
+                    NavigationClient.NAVIGATION_KEY
             );
 
         } catch (IOException e) {
@@ -133,6 +141,16 @@ public final class AetherUtilitiesKeybindConfig {
         }
     }
 
+    public static void setNavigationKey(InputConstants.Key key) {
+
+        if (NavigationClient.NAVIGATION_KEY != null && key != null) {
+
+            NavigationClient.NAVIGATION_KEY.setKey(key);
+
+            KeyMapping.resetMapping();
+        }
+    }
+
     // ============================================================
     // SAVE
     // ============================================================
@@ -159,6 +177,12 @@ public final class AetherUtilitiesKeybindConfig {
                 properties,
                 GAMMA_KEY,
                 GammaClient.TOGGLE_KEY
+        );
+
+        saveKey(
+                properties,
+                NAVIGATION_KEY,
+                NavigationClient.NAVIGATION_KEY
         );
 
         try {

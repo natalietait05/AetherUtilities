@@ -1,10 +1,11 @@
-
 package com.aetheris.aetherutilities.client;
 
 import com.aetheris.aetherutilities.gamma.GammaClient;
 import com.aetheris.aetherutilities.lightlevels.LightLevelsClient;
 import com.aetheris.aetherutilities.lightlevels.LightLevelsConfig;
 import com.aetheris.aetherutilities.lightlevels.LightLevelsRenderer;
+import com.aetheris.aetherutilities.navigation.NavigationClient;
+import com.aetheris.aetherutilities.navigation.NavigationScreen;
 import com.aetheris.aetherutilities.zoom.ZoomClient;
 import com.aetheris.aetherutilities.zoom.ZoomConfig;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -64,7 +65,8 @@ public final class AetherUtilitiesConfigScreen extends Screen {
     private Button autoRefillButton;
     private Button autoToolButton;
 
-    private Button navigationButton;
+    private Button navigationKeyButton;
+    private Button navigationMenuButton;
 
     private Button doneButton;
 
@@ -76,9 +78,7 @@ public final class AetherUtilitiesConfigScreen extends Screen {
     private Button waitingForKeyButton;
 
     public AetherUtilitiesConfigScreen(Screen parent) {
-
         super(Component.literal("AetherUtilities"));
-
         this.parent = parent;
     }
 
@@ -109,7 +109,6 @@ public final class AetherUtilitiesConfigScreen extends Screen {
 
         updateControlPositions();
 
-        // Done permanece fuera del área desplazable.
         doneButton = this.addRenderableWidget(
                 Button.builder(
                                 Component.literal("Done"),
@@ -267,11 +266,32 @@ public final class AetherUtilitiesConfigScreen extends Screen {
                         .build()
         );
 
-        navigationButton = this.addRenderableWidget(
+        // NAVIGATION KEYBIND
+
+        navigationKeyButton = this.addRenderableWidget(
                 Button.builder(
-                                Component.literal("Open Navigation"),
+                                getKeyText(NavigationClient.NAVIGATION_KEY),
+                                button -> startKeySelection(
+                                        NavigationClient.NAVIGATION_KEY,
+                                        button
+                                )
+                        )
+                        .bounds(
+                                controlX,
+                                viewportTop,
+                                CONTROL_WIDTH,
+                                CONTROL_HEIGHT
+                        )
+                        .build()
+        );
+
+        // NAVIGATION MENU
+
+        navigationMenuButton = this.addRenderableWidget(
+                Button.builder(
+                                Component.literal("Navigation Menu"),
                                 button -> this.minecraft.gui.setScreen(
-                                        new com.aetheris.aetherutilities.navigation.NavigationScreen(this)
+                                        new NavigationScreen(this)
                                 )
                         )
                         .bounds(
@@ -296,58 +316,28 @@ public final class AetherUtilitiesConfigScreen extends Screen {
 
         // LIGHT LEVELS
 
-        positionWidget(
-                lightLevelsKeyButton,
-                24
-        );
-
-        positionWidget(
-                radiusSlider,
-                49
-        );
+        positionWidget(lightLevelsKeyButton, 24);
+        positionWidget(radiusSlider, 49);
 
         // ZOOM
 
-        positionWidget(
-                zoomKeyButton,
-                SECTION_STEP + 24
-        );
-
-        positionWidget(
-                zoomSlider,
-                SECTION_STEP + 49
-        );
+        positionWidget(zoomKeyButton, SECTION_STEP + 24);
+        positionWidget(zoomSlider, SECTION_STEP + 49);
 
         // GAMMA
 
-        positionWidget(
-                gammaModeButton,
-                SECTION_STEP * 2 + 24
-        );
-
-        positionWidget(
-                gammaKeyButton,
-                SECTION_STEP * 2 + 49
-        );
+        positionWidget(gammaModeButton, SECTION_STEP * 2 + 24);
+        positionWidget(gammaKeyButton, SECTION_STEP * 2 + 49);
 
         // AUTOMATION
 
-        positionWidget(
-                autoRefillButton,
-                SECTION_STEP * 3 + 24
-        );
-
-        positionWidget(
-                autoToolButton,
-                SECTION_STEP * 3 + 49
-        );
+        positionWidget(autoRefillButton, SECTION_STEP * 3 + 24);
+        positionWidget(autoToolButton, SECTION_STEP * 3 + 49);
 
         // NAVIGATION
 
-        positionWidget(
-                navigationButton,
-                SECTION_STEP * 4 + 24
-        );
+        positionWidget(navigationKeyButton, SECTION_STEP * 4 + 24);
+        positionWidget(navigationMenuButton, SECTION_STEP * 4 + 49);
     }
 
     private void positionWidget(
@@ -367,7 +357,6 @@ public final class AetherUtilitiesConfigScreen extends Screen {
     }
 
     private int getMaxScroll() {
-
         return Math.max(
                 0,
                 CONTENT_HEIGHT - viewportHeight
@@ -474,9 +463,7 @@ public final class AetherUtilitiesConfigScreen extends Screen {
         if (waitingForKey != null) {
 
             if (event.isEscape()) {
-
                 cancelKeySelection();
-
                 return true;
             }
 
@@ -493,6 +480,10 @@ public final class AetherUtilitiesConfigScreen extends Screen {
             } else if (waitingForKey == GammaClient.TOGGLE_KEY) {
 
                 AetherUtilitiesKeybindConfig.setGammaKey(key);
+
+            } else if (waitingForKey == NavigationClient.NAVIGATION_KEY) {
+
+                AetherUtilitiesKeybindConfig.setNavigationKey(key);
             }
 
             waitingForKeyButton.setMessage(
@@ -567,9 +558,6 @@ public final class AetherUtilitiesConfigScreen extends Screen {
                 partialTick
         );
 
-        // Un único panel oscuro y semitransparente.
-        // El mundo sigue visible detrás de él.
-
         graphics.fill(
                 panelX,
                 viewportTop - 10,
@@ -595,7 +583,6 @@ public final class AetherUtilitiesConfigScreen extends Screen {
                 + SECTION_OFFSETS[sectionIndex]
                 - scrollOffset;
 
-        // No dibujar títulos que estén fuera del viewport.
         if (headerY < viewportTop
                 || headerY + 20 > viewportBottom) {
             return;
@@ -609,7 +596,6 @@ public final class AetherUtilitiesConfigScreen extends Screen {
                 0xFFFFFFFF
         );
 
-        // Línea divisoria bajo el título.
         graphics.fill(
                 panelX + 18,
                 headerY + 19,
@@ -684,14 +670,11 @@ public final class AetherUtilitiesConfigScreen extends Screen {
 
         int thumbY = viewportTop;
 
-        if (maxScroll > 0) {
-
-            thumbY += (int) (
-                    (double) scrollOffset
-                            / maxScroll
-                            * thumbTravel
-            );
-        }
+        thumbY += (int) (
+                (double) scrollOffset
+                        / maxScroll
+                        * thumbTravel
+        );
 
         graphics.fill(
                 scrollbarX,
@@ -722,7 +705,6 @@ public final class AetherUtilitiesConfigScreen extends Screen {
             float delta
     ) {
 
-        // Dibujar títulos y descripciones antes que los controles.
         drawSection(
                 graphics,
                 "LIGHT LEVELS",
@@ -759,13 +741,12 @@ public final class AetherUtilitiesConfigScreen extends Screen {
                 graphics,
                 "NAVIGATION",
                 4,
-                "Manage your waypoints",
-                "Configure waypoint displays"
+                "Navigation keybind",
+                "Open waypoint manager"
         );
 
         drawScrollbar(graphics);
 
-        // Los controles se renderizan normalmente.
         super.extractRenderState(
                 graphics,
                 mouseX,
@@ -850,7 +831,6 @@ public final class AetherUtilitiesConfigScreen extends Screen {
         protected void applyValue() {
 
             LightLevelsConfig.setRadius(valueToRadius());
-
             LightLevelsConfig.save();
 
             updateMessage();
@@ -910,7 +890,6 @@ public final class AetherUtilitiesConfigScreen extends Screen {
         protected void applyValue() {
 
             ZoomConfig.setZoom(valueToZoom());
-
             ZoomConfig.save();
 
             updateMessage();

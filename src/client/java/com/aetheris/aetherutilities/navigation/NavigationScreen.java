@@ -1,4 +1,3 @@
-
 package com.aetheris.aetherutilities.navigation;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -18,8 +17,14 @@ public final class NavigationScreen extends Screen {
 
     private int pageOffset = 0;
 
+    private static final int LABEL_WIDTH = 190;
+    private static final int TOGGLE_WIDTH = 45;
+    private static final int DELETE_WIDTH = 22;
+    private static final int ROW_GAP = 5;
+    private static final int ROW_HEIGHT = 25;
+
     private NavigationScreen(Screen parent, int pageOffset) {
-        super(Component.literal("AetherNavigation"));
+        super(Component.literal("Waypoints"));
         this.parent = parent;
         this.pageOffset = pageOffset;
     }
@@ -131,12 +136,12 @@ public final class NavigationScreen extends Screen {
                 NavigationConfig.getWaypoints();
 
         int centerX = this.width / 2;
-        int rowHeight = 25;
+
         int startY = 125;
 
         int availableRows = Math.max(
                 1,
-                (this.height - 195) / rowHeight
+                (this.height - 195) / ROW_HEIGHT
         );
 
         int maxOffset = Math.max(
@@ -154,17 +159,24 @@ public final class NavigationScreen extends Screen {
                 pageOffset + availableRows
         );
 
+        // Ancho total de cada fila.
+        int rowWidth =
+                LABEL_WIDTH
+                        + ROW_GAP
+                        + TOGGLE_WIDTH
+                        + ROW_GAP
+                        + DELETE_WIDTH;
+
+        int rowX = centerX - rowWidth / 2;
+
         for (int i = pageOffset; i < end; i++) {
 
             NavigationWaypoint waypoint = waypoints.get(i);
 
-            int rowY = startY + (i - pageOffset) * rowHeight;
+            int rowY = startY + (i - pageOffset) * ROW_HEIGHT;
 
-            int labelX = centerX - 190;
-
-            String label =
-                    waypoint.getName()
-                            + "  ["
+            String coordinates =
+                    " ["
                             + waypoint.getX()
                             + ", "
                             + waypoint.getY()
@@ -172,18 +184,28 @@ public final class NavigationScreen extends Screen {
                             + waypoint.getZ()
                             + "]";
 
+            String displayName = createShortenedLabel(
+                    waypoint.getName(),
+                    coordinates,
+                    LABEL_WIDTH - 12
+            );
+
+            String label = displayName + coordinates;
+
+            // Clicking the name opens the editor.
             this.addRenderableWidget(
                     Button.builder(
                             Component.literal(label),
                             button -> openEditor(waypoint)
                     ).bounds(
-                            labelX,
+                            rowX,
                             rowY,
-                            215,
+                            LABEL_WIDTH,
                             20
                     ).build()
             );
 
+            // Enable / disable waypoint.
             this.addRenderableWidget(
                     Button.builder(
                             Component.literal(
@@ -195,28 +217,17 @@ public final class NavigationScreen extends Screen {
                                 refreshScreen();
                             }
                     ).bounds(
-                            labelX + 220,
+                            rowX + LABEL_WIDTH + ROW_GAP,
                             rowY,
-                            45,
+                            TOGGLE_WIDTH,
                             20
                     ).build()
             );
 
+            // Delete waypoint.
             this.addRenderableWidget(
                     Button.builder(
-                            Component.literal("Edit"),
-                            button -> openEditor(waypoint)
-                    ).bounds(
-                            labelX + 270,
-                            rowY,
-                            45,
-                            20
-                    ).build()
-            );
-
-            this.addRenderableWidget(
-                    Button.builder(
-                            Component.literal("Delete"),
+                            Component.literal("X"),
                             button -> {
                                 NavigationConfig.removeWaypoint(
                                         waypoint.getId()
@@ -224,13 +235,58 @@ public final class NavigationScreen extends Screen {
                                 refreshScreen();
                             }
                     ).bounds(
-                            labelX + 320,
+                            rowX + LABEL_WIDTH + ROW_GAP
+                                    + TOGGLE_WIDTH + ROW_GAP,
                             rowY,
-                            60,
+                            DELETE_WIDTH,
                             20
                     ).build()
             );
         }
+    }
+
+    /**
+     * Recorta el nombre para que quepa en el botón,
+     * manteniendo siempre visibles las coordenadas.
+     */
+    private String createShortenedLabel(
+            String name,
+            String coordinates,
+            int maxWidth
+    ) {
+
+        int availableNameWidth =
+                maxWidth - this.font.width(coordinates);
+
+        if (availableNameWidth <= 0) {
+            return "";
+        }
+
+        if (this.font.width(name) <= availableNameWidth) {
+            return name;
+        }
+
+        String ellipsis = "...";
+
+        int ellipsisWidth = this.font.width(ellipsis);
+
+        if (availableNameWidth <= ellipsisWidth) {
+            return "";
+        }
+
+        String shortened = name;
+
+        while (!shortened.isEmpty()
+                && this.font.width(shortened + ellipsis)
+                > availableNameWidth) {
+
+            shortened = shortened.substring(
+                    0,
+                    shortened.length() - 1
+            );
+        }
+
+        return shortened + ellipsis;
     }
 
     private void openEditor(NavigationWaypoint waypoint) {
@@ -244,7 +300,7 @@ public final class NavigationScreen extends Screen {
 
         int availableRows = Math.max(
                 1,
-                (this.height - 195) / 25
+                (this.height - 195) / ROW_HEIGHT
         );
 
         pageOffset += direction * availableRows;

@@ -1,4 +1,3 @@
-
 package com.aetheris.aetherutilities.navigation;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -18,6 +17,9 @@ public final class FloatingWaypointRenderer {
 
     // Altura deseada del texto en píxeles de pantalla.
     private static final double TARGET_TEXT_HEIGHT_PIXELS = 18.0;
+
+    // Ángulo máximo para mostrar el nombre y la distancia.
+    private static final double LABEL_ANGLE_DEGREES = 12.0;
 
     private FloatingWaypointRenderer() {
     }
@@ -49,9 +51,6 @@ public final class FloatingWaypointRenderer {
         Vec3 camera =
                 context.levelState().cameraRenderState.pos;
 
-        var cameraOrientation =
-                context.levelState().cameraRenderState.orientation;
-
         Font font = minecraft.font;
 
         SubmitNodeCollector collector =
@@ -69,6 +68,9 @@ public final class FloatingWaypointRenderer {
 
         double halfFovTangent =
                 Math.tan(fovRadians / 2.0);
+
+        Vec3 lookDirection =
+                player.getViewVector(1.0F).normalize();
 
         for (NavigationWaypoint waypoint :
                 NavigationConfig.getWaypoints()) {
@@ -93,16 +95,25 @@ public final class FloatingWaypointRenderer {
                 continue;
             }
 
+            Vec3 directionToWaypoint =
+                    target.subtract(camera).normalize();
+
+            boolean showLabel =
+                    lookDirection.dot(directionToWaypoint)
+                            >= Math.cos(
+                            Math.toRadians(LABEL_ANGLE_DEGREES)
+                    );
+
             renderWaypoint(
                     waypoint,
                     distance,
                     target,
                     camera,
-                    cameraOrientation,
                     font,
                     collector,
                     screenHeight,
-                    halfFovTangent
+                    halfFovTangent,
+                    showLabel
             );
         }
     }
@@ -112,11 +123,11 @@ public final class FloatingWaypointRenderer {
             double distance,
             Vec3 target,
             Vec3 camera,
-            org.joml.Quaternionfc cameraOrientation,
             Font font,
             SubmitNodeCollector collector,
             int screenHeight,
-            double halfFovTangent
+            double halfFovTangent,
+            boolean showLabel
     ) {
 
         String distanceText;
@@ -144,15 +155,17 @@ public final class FloatingWaypointRenderer {
 
         float circleWidth = font.width(circle);
 
-        float gap = 4.0F;
+        float gap = 5.0F;
+
+        float textWidth = font.width(text);
 
         float totalWidth =
-                circleWidth + gap + font.width(text);
+                circleWidth + gap + textWidth;
 
         /*
          * Escala proporcional a la distancia.
          *
-         * Esto compensa la perspectiva de la cámara:
+         * Compensa la perspectiva de la cámara:
          * cuanto más lejos está el waypoint, mayor es
          * su tamaño en el mundo para mantener el mismo
          * tamaño aparente en pantalla.
@@ -178,61 +191,86 @@ public final class FloatingWaypointRenderer {
                 target.z - camera.z
         );
 
-        // Dirección desde el waypoint hacia la cámara.
-        org.joml.Vector3f directionToCamera =
-                new org.joml.Vector3f(
-                        (float) (camera.x - target.x),
-                        (float) (camera.y - target.y),
-                        (float) (camera.z - target.z)
-                );
+        /*
+         * Billboard con yaw y pitch explícitos.
+         *
+         * Evita el roll que puede producir rotationTo()
+         * y mantiene el texto orientado hacia la cámara.
+         */
 
-        if (directionToCamera.lengthSquared() > 0.0001F) {
+        double dx = camera.x - target.x;
+        double dy = camera.y - target.y;
+        double dz = camera.z - target.z;
 
-            directionToCamera.normalize();
+        double horizontalDistance =
+                Math.sqrt(dx * dx + dz * dz);
 
-            // Orienta la superficie del marcador hacia la cámara.
-            org.joml.Quaternionf billboardRotation =
-                    new org.joml.Quaternionf().rotationTo(
-                            new org.joml.Vector3f(0.0F, 0.0F, 1.0F),
-                            directionToCamera
-                    );
+        float yaw = (float) Math.atan2(-dx, -dz);
 
-            poseStack.rotate(billboardRotation);
-        }
+        float pitch = (float) Math.atan2(
+                dy,
+                horizontalDistance
+        );
 
+        org.joml.Quaternionf billboardRotation =
+                new org.joml.Quaternionf()
+                        .rotationY(yaw)
+                        .rotateX(pitch);
+
+        poseStack.rotate(billboardRotation);
+
+        // Escala adaptativa.
         poseStack.scale(
-                textScale,
-                textScale,
+                -textScale,
+                -textScale,
                 textScale
         );
 
-        // Círculo con el color configurado en el waypoint.
+        /*
+         * CÍRCULO
+         *
+         * Siempre visible, incluso cuando el jugador
+         * no está mirando directamente el waypoint.
+         */
+
         collector.submitText(
                 poseStack,
-                -totalWidth / 2.0F,
+                -circleWidth / 2.0F,
                 -4.0F,
                 circle,
-                true,
-                Font.DisplayMode.NORMAL,
+                false,
+                Font.DisplayMode.SEE_THROUGH,
                 0xF000F0,
                 0xFF000000 | (waypoint.getColor() & 0xFFFFFF),
                 0,
                 0
         );
 
-        // Nombre y distancia en blanco.
-        collector.submitText(
-                poseStack,
-                -totalWidth / 2.0F + circleWidth + gap,
-                -4.0F,
-                text,
-                true,
-                Font.DisplayMode.NORMAL,
-                0xF000F0,
-                0xFFFFFFFF,
-                0,
-                0
-        );
+        /*
+         * NOMBRE Y DISTANCIA
+         *
+         * Solo aparecen cuando el jugador apunta
+         * suficientemente cerca del waypoint.
+         */
+
+        if (showLabel) {
+
+            float labelStart =
+                    -totalWidth / 2.0F + circleWidth + gap;
+
+            collector.submitText(
+                    poseStack,
+                    labelStart,
+                    -4.0F,
+                    text,
+                    false,
+                    Font.DisplayMode.SEE_THROUGH,
+                    0xF000F0,
+                    0xFFFFFFFF,
+                    0,
+                    0xA0000000
+            );
+        }
 
         poseStack.popPose();
     }
