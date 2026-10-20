@@ -15,6 +15,8 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.screens.Screen;
 import com.aetheris.aetherutilities.autotool.AutoTool;
+import com.aetheris.aetherutilities.navigation.NavigationConfig;
+import com.aetheris.aetherutilities.navigation.NavigationClient;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 
 
@@ -38,17 +40,20 @@ public final class AetherUtilitiesClient implements ClientModInitializer {
                 )
         );
 
+        AetherUtilitiesKeybindConfig.load();
+        AutoFeaturesConfig.load();
+        NavigationConfig.load();
+
         LightLevelsClient.initialize();
         ZoomClient.initialize();
         InventorySorterClient.initialize();
         GammaClient.initialize();
         LockedTradesClient.initialize();
+        NavigationClient.initialize();
+
+        AutoRefill.initialize();
 
         ClientTickEvents.END_CLIENT_TICK.register(AutoTool::onClientTick);
-
-        AetherUtilitiesKeybindConfig.load();
-        AutoFeaturesConfig.load();
-        AutoRefill.initialize();
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
 

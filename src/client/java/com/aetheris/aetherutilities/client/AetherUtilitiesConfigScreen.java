@@ -33,8 +33,10 @@ public final class AetherUtilitiesConfigScreen extends Screen {
     private static final int SECTION_STEP = 88;
 
     private static final int[] SECTION_OFFSETS = {
-            0, 88, 176, 264
+            0, 88, 176, 264, 352
     };
+
+    private static final int CONTENT_HEIGHT = 442;
 
     private int panelX;
     private int panelWidth;
@@ -45,7 +47,6 @@ public final class AetherUtilitiesConfigScreen extends Screen {
     private int viewportHeight;
 
     private int scrollOffset;
-    private static final int CONTENT_HEIGHT = 354;
 
     // ============================================================
     // CONTROLS
@@ -62,6 +63,8 @@ public final class AetherUtilitiesConfigScreen extends Screen {
 
     private Button autoRefillButton;
     private Button autoToolButton;
+
+    private Button navigationButton;
 
     private Button doneButton;
 
@@ -264,6 +267,22 @@ public final class AetherUtilitiesConfigScreen extends Screen {
                         .build()
         );
 
+        navigationButton = this.addRenderableWidget(
+                Button.builder(
+                                Component.literal("Open Navigation"),
+                                button -> this.minecraft.gui.setScreen(
+                                        new com.aetheris.aetherutilities.navigation.NavigationScreen(this)
+                                )
+                        )
+                        .bounds(
+                                controlX,
+                                viewportTop,
+                                CONTROL_WIDTH,
+                                CONTROL_HEIGHT
+                        )
+                        .build()
+        );
+
         updateGammaButton();
         updateAutoRefillButton();
         updateAutoToolButton();
@@ -321,6 +340,13 @@ public final class AetherUtilitiesConfigScreen extends Screen {
         positionWidget(
                 autoToolButton,
                 SECTION_STEP * 3 + 49
+        );
+
+        // NAVIGATION
+
+        positionWidget(
+                navigationButton,
+                SECTION_STEP * 4 + 24
         );
     }
 
@@ -727,6 +753,14 @@ public final class AetherUtilitiesConfigScreen extends Screen {
                 3,
                 "Automatic inventory refill",
                 "Automatic tool selection"
+        );
+
+        drawSection(
+                graphics,
+                "NAVIGATION",
+                4,
+                "Manage your waypoints",
+                "Configure waypoint displays"
         );
 
         drawScrollbar(graphics);

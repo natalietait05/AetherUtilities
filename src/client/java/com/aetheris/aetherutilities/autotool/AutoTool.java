@@ -408,7 +408,7 @@ public final class AutoTool {
      * Swaps a main inventory tool with the currently selected
      * hotbar slot.
      */
-    private static boolean moveToolToSelectedSlot(
+    private static void moveToolToSelectedSlot(
             Minecraft client,
             Player player,
             Inventory inventory,
@@ -417,8 +417,8 @@ public final class AutoTool {
 
         AbstractContainerMenu menu = player.inventoryMenu;
 
-        if (menu == null || player.containerMenu != menu) {
-            return false;
+        if (player.containerMenu != menu) {
+            return;
         }
 
         int selectedHotbarSlot = inventory.getSelectedSlot();
@@ -430,7 +430,7 @@ public final class AutoTool {
                 || sourceMenuSlot >= menu.slots.size()
                 || targetMenuSlot < 0
                 || targetMenuSlot >= menu.slots.size()) {
-            return false;
+            return;
         }
 
         Slot source = menu.slots.get(sourceMenuSlot);
@@ -438,7 +438,7 @@ public final class AutoTool {
 
         if (!source.hasItem()
                 || !target.mayPlace(source.getItem())) {
-            return false;
+            return;
         }
 
         swapSlots(
@@ -448,7 +448,6 @@ public final class AutoTool {
                 target
         );
 
-        return true;
     }
 
     /**
@@ -478,7 +477,7 @@ public final class AutoTool {
 
         AbstractContainerMenu menu = player.inventoryMenu;
 
-        if (menu == null || player.containerMenu != menu) {
+        if (player.containerMenu != menu) {
             return false;
         }
 
