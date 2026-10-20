@@ -2,12 +2,11 @@
 package com.aetheris.aetherutilities.navigation;
 
 import com.aetheris.aetherutilities.client.AetherUtilitiesClient;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.screens.Screen;
-import com.mojang.blaze3d.platform.InputConstants;
-
 
 public final class NavigationClient {
 
@@ -26,6 +25,13 @@ public final class NavigationClient {
                 )
         );
 
+        // Initialize floating world markers.
+        FloatingWaypointRenderer.initialize();
+
+        // Initialize native locator bar synchronization.
+        NavigationLocatorSync.initialize();
+
+        // Navigation screen key.
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
 
             while (NAVIGATION_KEY.consumeClick()) {
