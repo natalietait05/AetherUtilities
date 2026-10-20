@@ -6,6 +6,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
 
@@ -24,6 +25,13 @@ public final class WaypointEditorScreen extends Screen {
     private String dimensionId = "minecraft:overworld";
     private String errorMessage = "";
 
+    // Temporary form values preserved when opening the color screen.
+    private String savedName = "";
+    private String savedX = "";
+    private String savedY = "";
+    private String savedZ = "";
+    private boolean restoreFormValues = false;
+
     public WaypointEditorScreen(
             Screen parent,
             NavigationWaypoint waypoint
@@ -35,8 +43,6 @@ public final class WaypointEditorScreen extends Screen {
         this.parent = parent;
         this.editingWaypoint = waypoint;
 
-        // Load the existing color only once.
-        // Do not reset it when returning from the color screen.
         if (waypoint != null) {
             this.waypointColor = waypoint.getColor();
             this.dimensionId = waypoint.getDimension();
@@ -48,22 +54,16 @@ public final class WaypointEditorScreen extends Screen {
 
         int centerX = this.width / 2;
 
-        int startY = 70;
-
-        // -------------------------------------------------
         // NAME
-        // -------------------------------------------------
 
         nameField = createField(
                 centerX - 110,
-                startY,
+                70,
                 220,
                 "Waypoint name"
         );
 
-        // -------------------------------------------------
         // COORDINATES
-        // -------------------------------------------------
 
         int coordinateWidth = 66;
         int coordinateGap = 10;
@@ -97,11 +97,18 @@ public final class WaypointEditorScreen extends Screen {
                 ""
         );
 
-        // -------------------------------------------------
-        // EXISTING WAYPOINT
-        // -------------------------------------------------
+        // INITIAL VALUES OR RESTORE TEMPORARY VALUES
 
-        if (editingWaypoint != null) {
+        if (restoreFormValues) {
+
+            nameField.setValue(savedName);
+            xField.setValue(savedX);
+            yField.setValue(savedY);
+            zField.setValue(savedZ);
+
+            restoreFormValues = false;
+
+        } else if (editingWaypoint != null) {
 
             nameField.setValue(editingWaypoint.getName());
 
@@ -130,9 +137,7 @@ public final class WaypointEditorScreen extends Screen {
             }
         }
 
-        // -------------------------------------------------
         // COLOR BUTTON
-        // -------------------------------------------------
 
         this.addRenderableWidget(
                 Button.builder(
@@ -148,9 +153,23 @@ public final class WaypointEditorScreen extends Screen {
                         .build()
         );
 
-        // -------------------------------------------------
+        // SET HERE BUTTON
+
+        this.addRenderableWidget(
+                Button.builder(
+                                Component.literal("Set Here"),
+                                button -> setHere()
+                        )
+                        .bounds(
+                                centerX - 55,
+                                194,
+                                110,
+                                20
+                        )
+                        .build()
+        );
+
         // SAVE
-        // -------------------------------------------------
 
         this.addRenderableWidget(
                 Button.builder(
@@ -166,9 +185,7 @@ public final class WaypointEditorScreen extends Screen {
                         .build()
         );
 
-        // -------------------------------------------------
         // CANCEL
-        // -------------------------------------------------
 
         this.addRenderableWidget(
                 Button.builder(
@@ -211,20 +228,69 @@ public final class WaypointEditorScreen extends Screen {
     }
 
     // -----------------------------------------------------
+    // PRESERVE FORM VALUES
+    // -----------------------------------------------------
+
+    private void saveFormValues() {
+
+        savedName = nameField.getValue();
+        savedX = xField.getValue();
+        savedY = yField.getValue();
+        savedZ = zField.getValue();
+
+        restoreFormValues = true;
+    }
+
+    // -----------------------------------------------------
     // OPEN COLOR SCREEN
     // -----------------------------------------------------
 
     private void openColorScreen() {
 
+        // Preserve everything before leaving this screen.
+        saveFormValues();
+
         this.minecraft.gui.setScreen(
                 new WaypointColorScreen(
                         this,
                         waypointColor,
-                        color -> {
-                            waypointColor = color;
-                        }
+                        color -> waypointColor = color
                 )
         );
+    }
+
+    // -----------------------------------------------------
+    // SET CURRENT PLAYER POSITION
+    // -----------------------------------------------------
+
+    private void setHere() {
+
+        Minecraft client = Minecraft.getInstance();
+
+        if (client.player == null || client.level == null) {
+
+            errorMessage = "Player position unavailable";
+
+            return;
+        }
+
+        BlockPos position = client.player.blockPosition();
+
+        xField.setValue(
+                Integer.toString(position.getX())
+        );
+
+        yField.setValue(
+                Integer.toString(position.getY())
+        );
+
+        zField.setValue(
+                Integer.toString(position.getZ())
+        );
+
+        dimensionId = client.level.dimension().toString();
+
+        errorMessage = "";
     }
 
     // -----------------------------------------------------
@@ -327,6 +393,7 @@ public final class WaypointEditorScreen extends Screen {
                         z
                 );
 
+                editingWaypoint.setDimension(dimensionId);
                 editingWaypoint.setColor(waypointColor);
 
                 NavigationConfig.saveChanges();
@@ -482,7 +549,7 @@ public final class WaypointEditorScreen extends Screen {
                 this.font,
                 Component.literal("DIMENSION"),
                 centerX,
-                210,
+                232,
                 0xFFAAAAAA
         );
 
@@ -490,7 +557,7 @@ public final class WaypointEditorScreen extends Screen {
                 this.font,
                 Component.literal(getDimensionDisplayName()),
                 centerX,
-                225,
+                247,
                 0xFFFFFFFF
         );
 

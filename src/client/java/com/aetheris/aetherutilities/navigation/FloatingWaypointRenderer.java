@@ -16,37 +16,33 @@ public final class FloatingWaypointRenderer {
 
     private static final double MAX_RENDER_DISTANCE = 256.0;
 
-    private static final float TEXT_SCALE = 1.0F / 40.0F;
+    // Altura deseada del texto en píxeles de pantalla.
+    private static final double TARGET_TEXT_HEIGHT_PIXELS = 18.0;
 
     private FloatingWaypointRenderer() {
     }
 
-    // -----------------------------------------------------
-    // INITIALIZE
-    // -----------------------------------------------------
-
     public static void initialize() {
-
         LevelRenderEvents.COLLECT_SUBMITS.register(
                 FloatingWaypointRenderer::render
         );
+
+        System.out.println(
+                "[AetherUtilities Navigation] Floating renderer initialized"
+        );
     }
 
-    // -----------------------------------------------------
-    // RENDER
-    // -----------------------------------------------------
-
     private static void render(LevelRenderContext context) {
-
-        if (!NavigationConfig.isFloatingEnabled()) {
-            return;
-        }
 
         Minecraft minecraft = Minecraft.getInstance();
 
         Player player = minecraft.player;
 
         if (player == null || minecraft.level == null) {
+            return;
+        }
+
+        if (!NavigationConfig.isFloatingEnabled()) {
             return;
         }
 
@@ -61,8 +57,18 @@ public final class FloatingWaypointRenderer {
         SubmitNodeCollector collector =
                 context.submitNodeCollector();
 
-        String currentDimension =
+        String dimension =
                 minecraft.level.dimension().toString();
+
+        int screenHeight =
+                Math.max(1, minecraft.getWindow().getHeight());
+
+        double fovRadians = Math.toRadians(
+                minecraft.options.fov().get()
+        );
+
+        double halfFovTangent =
+                Math.tan(fovRadians / 2.0);
 
         for (NavigationWaypoint waypoint :
                 NavigationConfig.getWaypoints()) {
@@ -71,7 +77,7 @@ public final class FloatingWaypointRenderer {
                 continue;
             }
 
-            if (!waypoint.getDimension().equals(currentDimension)) {
+            if (!waypoint.getDimension().equals(dimension)) {
                 continue;
             }
 
@@ -81,13 +87,7 @@ public final class FloatingWaypointRenderer {
                     waypoint.getZ() + 0.5
             );
 
-            double dx = target.x - player.getX();
-            double dy = target.y - player.getY();
-            double dz = target.z - player.getZ();
-
-            double distance = Math.sqrt(
-                    dx * dx + dy * dy + dz * dz
-            );
+            double distance = camera.distanceTo(target);
 
             if (distance > MAX_RENDER_DISTANCE) {
                 continue;
@@ -100,36 +100,33 @@ public final class FloatingWaypointRenderer {
                     camera,
                     cameraOrientation,
                     font,
-                    collector
+                    collector,
+                    screenHeight,
+                    halfFovTangent
             );
         }
     }
-
-    // -----------------------------------------------------
-    // RENDER SINGLE WAYPOINT
-    // -----------------------------------------------------
 
     private static void renderWaypoint(
             NavigationWaypoint waypoint,
             double distance,
             Vec3 target,
             Vec3 camera,
-            org.joml.Quaternionf cameraOrientation,
+            org.joml.Quaternionfc cameraOrientation,
             Font font,
-            SubmitNodeCollector collector
+            SubmitNodeCollector collector,
+            int screenHeight,
+            double halfFovTangent
     ) {
 
         String distanceText;
 
         if (distance >= 1000.0) {
-
             distanceText = String.format(
                     "%.1f km",
                     distance / 1000.0
             );
-
         } else {
-
             distanceText = String.format(
                     "%.0f m",
                     distance
@@ -137,9 +134,7 @@ public final class FloatingWaypointRenderer {
         }
 
         String label =
-                waypoint.getName()
-                        + "  "
-                        + distanceText;
+                waypoint.getName() + "  " + distanceText;
 
         FormattedCharSequence circle =
                 Component.literal("●").getVisualOrderText();
@@ -148,36 +143,73 @@ public final class FloatingWaypointRenderer {
                 Component.literal(label).getVisualOrderText();
 
         float circleWidth = font.width(circle);
-        float textWidth = font.width(text);
 
         float gap = 4.0F;
 
         float totalWidth =
-                circleWidth + gap + textWidth;
+                circleWidth + gap + font.width(text);
 
-        float startX = -totalWidth / 2.0F;
+        /*
+         * Escala proporcional a la distancia.
+         *
+         * Esto compensa la perspectiva de la cámara:
+         * cuanto más lejos está el waypoint, mayor es
+         * su tamaño en el mundo para mantener el mismo
+         * tamaño aparente en pantalla.
+         */
+
+        double worldUnitsPerPixel =
+                (2.0 * distance * halfFovTangent)
+                        / screenHeight;
+
+        float textScale = (float) (
+                worldUnitsPerPixel
+                        * (TARGET_TEXT_HEIGHT_PIXELS / 9.0)
+        );
 
         PoseStack poseStack = new PoseStack();
 
+        poseStack.pushPose();
+
+        // Posición relativa a la cámara.
         poseStack.translate(
                 target.x - camera.x,
-                target.y + 0.8 - camera.y,
+                target.y + 1.01 - camera.y,
                 target.z - camera.z
         );
 
-        poseStack.rotate(cameraOrientation);
+        // Dirección desde el waypoint hacia la cámara.
+        org.joml.Vector3f directionToCamera =
+                new org.joml.Vector3f(
+                        (float) (camera.x - target.x),
+                        (float) (camera.y - target.y),
+                        (float) (camera.z - target.z)
+                );
+
+        if (directionToCamera.lengthSquared() > 0.0001F) {
+
+            directionToCamera.normalize();
+
+            // Orienta la superficie del marcador hacia la cámara.
+            org.joml.Quaternionf billboardRotation =
+                    new org.joml.Quaternionf().rotationTo(
+                            new org.joml.Vector3f(0.0F, 0.0F, 1.0F),
+                            directionToCamera
+                    );
+
+            poseStack.rotate(billboardRotation);
+        }
 
         poseStack.scale(
-                TEXT_SCALE,
-                TEXT_SCALE,
-                TEXT_SCALE
+                textScale,
+                textScale,
+                textScale
         );
 
-        // COLORED CIRCLE
-
+        // Círculo con el color configurado en el waypoint.
         collector.submitText(
                 poseStack,
-                startX,
+                -totalWidth / 2.0F,
                 -4.0F,
                 circle,
                 true,
@@ -188,11 +220,10 @@ public final class FloatingWaypointRenderer {
                 0
         );
 
-        // WAYPOINT NAME AND DISTANCE
-
+        // Nombre y distancia en blanco.
         collector.submitText(
                 poseStack,
-                startX + circleWidth + gap,
+                -totalWidth / 2.0F + circleWidth + gap,
                 -4.0F,
                 text,
                 true,
@@ -202,5 +233,7 @@ public final class FloatingWaypointRenderer {
                 0,
                 0
         );
+
+        poseStack.popPose();
     }
 }
