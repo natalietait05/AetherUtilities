@@ -17,7 +17,6 @@ import net.minecraft.client.gui.screens.Screen;
 import com.aetheris.aetherutilities.autotool.AutoTool;
 import com.aetheris.aetherutilities.navigation.NavigationConfig;
 import com.aetheris.aetherutilities.navigation.NavigationClient;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 
 
 public final class AetherUtilitiesClient implements ClientModInitializer {
@@ -40,7 +39,6 @@ public final class AetherUtilitiesClient implements ClientModInitializer {
                 )
         );
 
-        AetherUtilitiesKeybindConfig.load();
         AutoFeaturesConfig.load();
         NavigationConfig.load();
 
@@ -50,6 +48,8 @@ public final class AetherUtilitiesClient implements ClientModInitializer {
         GammaClient.initialize();
         LockedTradesClient.initialize();
         NavigationClient.initialize();
+
+        AetherUtilitiesKeybindConfig.load();
 
         AutoRefill.initialize();
 
