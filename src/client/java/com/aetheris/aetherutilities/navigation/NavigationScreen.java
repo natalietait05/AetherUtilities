@@ -1,3 +1,4 @@
+
 package com.aetheris.aetherutilities.navigation;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -14,6 +15,7 @@ public final class NavigationScreen extends Screen {
 
     private Button floatingButton;
     private Button locatorButton;
+    private Button compassButton;
 
     private int pageOffset = 0;
 
@@ -75,6 +77,23 @@ public final class NavigationScreen extends Screen {
                 ).build()
         );
 
+        compassButton = this.addRenderableWidget(
+                Button.builder(
+                        Component.empty(),
+                        button -> {
+                            NavigationConfig.setCompassEnabled(
+                                    !NavigationConfig.isCompassEnabled()
+                            );
+                            updateButtons();
+                        }
+                ).bounds(
+                        centerX - buttonWidth / 2,
+                        85,
+                        buttonWidth,
+                        buttonHeight
+                ).build()
+        );
+
         this.addRenderableWidget(
                 Button.builder(
                         Component.literal("Add Waypoint"),
@@ -83,7 +102,7 @@ public final class NavigationScreen extends Screen {
                         )
                 ).bounds(
                         centerX - buttonWidth / 2,
-                        90,
+                        115,
                         buttonWidth,
                         buttonHeight
                 ).build()
@@ -137,11 +156,11 @@ public final class NavigationScreen extends Screen {
 
         int centerX = this.width / 2;
 
-        int startY = 125;
+        int startY = 150;
 
         int availableRows = Math.max(
                 1,
-                (this.height - 195) / ROW_HEIGHT
+                (this.height - 220) / ROW_HEIGHT
         );
 
         int maxOffset = Math.max(
@@ -159,7 +178,6 @@ public final class NavigationScreen extends Screen {
                 pageOffset + availableRows
         );
 
-        // Ancho total de cada fila.
         int rowWidth =
                 LABEL_WIDTH
                         + ROW_GAP
@@ -192,7 +210,6 @@ public final class NavigationScreen extends Screen {
 
             String label = displayName + coordinates;
 
-            // Clicking the name opens the editor.
             this.addRenderableWidget(
                     Button.builder(
                             Component.literal(label),
@@ -205,7 +222,6 @@ public final class NavigationScreen extends Screen {
                     ).build()
             );
 
-            // Enable / disable waypoint.
             this.addRenderableWidget(
                     Button.builder(
                             Component.literal(
@@ -224,7 +240,6 @@ public final class NavigationScreen extends Screen {
                     ).build()
             );
 
-            // Delete waypoint.
             this.addRenderableWidget(
                     Button.builder(
                             Component.literal("X"),
@@ -245,10 +260,6 @@ public final class NavigationScreen extends Screen {
         }
     }
 
-    /**
-     * Recorta el nombre para que quepa en el botón,
-     * manteniendo siempre visibles las coordenadas.
-     */
     private String createShortenedLabel(
             String name,
             String coordinates,
@@ -300,7 +311,7 @@ public final class NavigationScreen extends Screen {
 
         int availableRows = Math.max(
                 1,
-                (this.height - 195) / ROW_HEIGHT
+                (this.height - 220) / ROW_HEIGHT
         );
 
         pageOffset += direction * availableRows;
@@ -333,6 +344,17 @@ public final class NavigationScreen extends Screen {
                     Component.literal(
                             "Locator Bar: "
                                     + (NavigationConfig.isLocatorEnabled()
+                                    ? "ON"
+                                    : "OFF")
+                    )
+            );
+        }
+
+        if (compassButton != null) {
+            compassButton.setMessage(
+                    Component.literal(
+                            "Compass: "
+                                    + (NavigationConfig.isCompassEnabled()
                                     ? "ON"
                                     : "OFF")
                     )
@@ -391,7 +413,7 @@ public final class NavigationScreen extends Screen {
                 this.font,
                 Component.literal("WAYPOINTS"),
                 this.width / 2,
-                115,
+                140,
                 0xFFAAAAAA
         );
 
@@ -400,7 +422,7 @@ public final class NavigationScreen extends Screen {
                     this.font,
                     Component.literal("No waypoints created yet"),
                     this.width / 2,
-                    145,
+                    170,
                     0xFFAAAAAA
             );
         }

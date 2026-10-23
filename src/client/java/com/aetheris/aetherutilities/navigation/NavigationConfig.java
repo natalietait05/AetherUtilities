@@ -17,6 +17,7 @@ public final class NavigationConfig {
 
     private static final String FLOATING_KEY = "floating_enabled";
     private static final String LOCATOR_KEY = "locator_enabled";
+    private static final String COMPASS_KEY = "compass_enabled";
     private static final String COUNT_KEY = "waypoint_count";
 
     private static final List<NavigationWaypoint> WAYPOINTS =
@@ -24,6 +25,7 @@ public final class NavigationConfig {
 
     private static boolean floatingEnabled = true;
     private static boolean locatorEnabled = true;
+    private static boolean compassEnabled = true;
 
     private NavigationConfig() {
     }
@@ -38,6 +40,10 @@ public final class NavigationConfig {
 
     public static boolean isLocatorEnabled() {
         return locatorEnabled;
+    }
+
+    public static boolean isCompassEnabled() {
+        return compassEnabled;
     }
 
     public static List<NavigationWaypoint> getWaypoints() {
@@ -55,6 +61,11 @@ public final class NavigationConfig {
 
     public static void setLocatorEnabled(boolean enabled) {
         locatorEnabled = enabled;
+        save();
+    }
+
+    public static void setCompassEnabled(boolean enabled) {
+        compassEnabled = enabled;
         save();
     }
 
@@ -124,6 +135,10 @@ public final class NavigationConfig {
 
             locatorEnabled = Boolean.parseBoolean(
                     properties.getProperty(LOCATOR_KEY, "true")
+            );
+
+            compassEnabled = Boolean.parseBoolean(
+                    properties.getProperty(COMPASS_KEY, "true")
             );
 
             int count = Integer.parseInt(
@@ -207,6 +222,11 @@ public final class NavigationConfig {
         properties.setProperty(
                 LOCATOR_KEY,
                 Boolean.toString(locatorEnabled)
+        );
+
+        properties.setProperty(
+                COMPASS_KEY,
+                Boolean.toString(compassEnabled)
         );
 
         properties.setProperty(
