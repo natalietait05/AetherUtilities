@@ -15,9 +15,16 @@ import java.util.Properties;
 
 public final class NavigationConfig {
 
+    public enum CompassMode {
+        ON_TOP,
+        ON_LOCATOR_BAR,
+        OFF
+    }
+
     private static final String FLOATING_KEY = "floating_enabled";
     private static final String LOCATOR_KEY = "locator_enabled";
-    private static final String COMPASS_KEY = "compass_enabled";
+    private static final String COMPASS_MODE_KEY = "compass_mode";
+    private static final String COMPASS_DIRECTIONS_KEY = "compass_eight_directions";
     private static final String COUNT_KEY = "waypoint_count";
 
     private static final List<NavigationWaypoint> WAYPOINTS =
@@ -25,7 +32,9 @@ public final class NavigationConfig {
 
     private static boolean floatingEnabled = true;
     private static boolean locatorEnabled = true;
-    private static boolean compassEnabled = true;
+
+    private static CompassMode compassMode = CompassMode.ON_TOP;
+    private static boolean compassEightDirections = true;
 
     private NavigationConfig() {
     }
@@ -42,8 +51,16 @@ public final class NavigationConfig {
         return locatorEnabled;
     }
 
+    public static CompassMode getCompassMode() {
+        return compassMode;
+    }
+
     public static boolean isCompassEnabled() {
-        return compassEnabled;
+        return compassMode != CompassMode.OFF;
+    }
+
+    public static boolean isCompassEightDirections() {
+        return compassEightDirections;
     }
 
     public static List<NavigationWaypoint> getWaypoints() {
@@ -64,9 +81,26 @@ public final class NavigationConfig {
         save();
     }
 
-    public static void setCompassEnabled(boolean enabled) {
-        compassEnabled = enabled;
+    public static void setCompassMode(CompassMode mode) {
+        compassMode = mode != null
+                ? mode
+                : CompassMode.OFF;
+
         save();
+    }
+
+    public static void setCompassEightDirections(boolean enabled) {
+        compassEightDirections = enabled;
+        save();
+    }
+
+    // Compatibility with previous boolean-based code.
+    public static void setCompassEnabled(boolean enabled) {
+        setCompassMode(
+                enabled
+                        ? CompassMode.ON_TOP
+                        : CompassMode.OFF
+        );
     }
 
     // ============================================================
@@ -137,8 +171,37 @@ public final class NavigationConfig {
                     properties.getProperty(LOCATOR_KEY, "true")
             );
 
-            compassEnabled = Boolean.parseBoolean(
-                    properties.getProperty(COMPASS_KEY, "true")
+            // New three-state compass configuration.
+            String savedCompassMode =
+                    properties.getProperty(COMPASS_MODE_KEY);
+
+            if (savedCompassMode != null) {
+
+                try {
+                    compassMode = CompassMode.valueOf(
+                            savedCompassMode
+                    );
+                } catch (IllegalArgumentException exception) {
+                    compassMode = CompassMode.ON_TOP;
+                }
+
+            } else {
+
+                // Migrate old configuration.
+                boolean oldCompassEnabled = Boolean.parseBoolean(
+                        properties.getProperty("compass_enabled", "true")
+                );
+
+                compassMode = oldCompassEnabled
+                        ? CompassMode.ON_TOP
+                        : CompassMode.OFF;
+            }
+
+            compassEightDirections = Boolean.parseBoolean(
+                    properties.getProperty(
+                            COMPASS_DIRECTIONS_KEY,
+                            "true"
+                    )
             );
 
             int count = Integer.parseInt(
@@ -151,6 +214,7 @@ public final class NavigationConfig {
 
                 String id = properties.getProperty(prefix + "id");
                 String name = properties.getProperty(prefix + "name");
+
                 String dimension = properties.getProperty(
                         prefix + "dimension",
                         "minecraft:overworld"
@@ -225,8 +289,13 @@ public final class NavigationConfig {
         );
 
         properties.setProperty(
-                COMPASS_KEY,
-                Boolean.toString(compassEnabled)
+                COMPASS_MODE_KEY,
+                compassMode.name()
+        );
+
+        properties.setProperty(
+                COMPASS_DIRECTIONS_KEY,
+                Boolean.toString(compassEightDirections)
         );
 
         properties.setProperty(

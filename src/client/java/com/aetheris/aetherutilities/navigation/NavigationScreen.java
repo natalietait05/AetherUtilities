@@ -16,6 +16,7 @@ public final class NavigationScreen extends Screen {
     private Button floatingButton;
     private Button locatorButton;
     private Button compassButton;
+    private Button compassDirectionsButton;
 
     private int pageOffset = 0;
 
@@ -81,14 +82,29 @@ public final class NavigationScreen extends Screen {
                 Button.builder(
                         Component.empty(),
                         button -> {
-                            NavigationConfig.setCompassEnabled(
-                                    !NavigationConfig.isCompassEnabled()
-                            );
+                            cycleCompassMode();
                             updateButtons();
                         }
                 ).bounds(
                         centerX - buttonWidth / 2,
                         85,
+                        buttonWidth,
+                        buttonHeight
+                ).build()
+        );
+
+        compassDirectionsButton = this.addRenderableWidget(
+                Button.builder(
+                        Component.empty(),
+                        button -> {
+                            NavigationConfig.setCompassEightDirections(
+                                    !NavigationConfig.isCompassEightDirections()
+                            );
+                            updateButtons();
+                        }
+                ).bounds(
+                        centerX - buttonWidth / 2,
+                        110,
                         buttonWidth,
                         buttonHeight
                 ).build()
@@ -102,7 +118,7 @@ public final class NavigationScreen extends Screen {
                         )
                 ).bounds(
                         centerX - buttonWidth / 2,
-                        115,
+                        140,
                         buttonWidth,
                         buttonHeight
                 ).build()
@@ -149,6 +165,26 @@ public final class NavigationScreen extends Screen {
         updateButtons();
     }
 
+    private void cycleCompassMode() {
+
+        NavigationConfig.CompassMode current =
+                NavigationConfig.getCompassMode();
+
+        NavigationConfig.CompassMode next =
+                switch (current) {
+                    case ON_TOP ->
+                            NavigationConfig.CompassMode.ON_LOCATOR_BAR;
+
+                    case ON_LOCATOR_BAR ->
+                            NavigationConfig.CompassMode.OFF;
+
+                    case OFF ->
+                            NavigationConfig.CompassMode.ON_TOP;
+                };
+
+        NavigationConfig.setCompassMode(next);
+    }
+
     private void createWaypointRows() {
 
         List<NavigationWaypoint> waypoints =
@@ -156,11 +192,11 @@ public final class NavigationScreen extends Screen {
 
         int centerX = this.width / 2;
 
-        int startY = 150;
+        int startY = 175;
 
         int availableRows = Math.max(
                 1,
-                (this.height - 220) / ROW_HEIGHT
+                (this.height - 245) / ROW_HEIGHT
         );
 
         int maxOffset = Math.max(
@@ -311,7 +347,7 @@ public final class NavigationScreen extends Screen {
 
         int availableRows = Math.max(
                 1,
-                (this.height - 220) / ROW_HEIGHT
+                (this.height - 245) / ROW_HEIGHT
         );
 
         pageOffset += direction * availableRows;
@@ -351,12 +387,27 @@ public final class NavigationScreen extends Screen {
         }
 
         if (compassButton != null) {
+
+            String modeText = switch (
+                    NavigationConfig.getCompassMode()
+                    ) {
+                case ON_TOP -> "On Top";
+                case ON_LOCATOR_BAR -> "On Locator Bar";
+                case OFF -> "Off";
+            };
+
             compassButton.setMessage(
+                    Component.literal("Compass: " + modeText)
+            );
+        }
+
+        if (compassDirectionsButton != null) {
+            compassDirectionsButton.setMessage(
                     Component.literal(
-                            "Compass: "
-                                    + (NavigationConfig.isCompassEnabled()
-                                    ? "ON"
-                                    : "OFF")
+                            "Compass Directions: "
+                                    + (NavigationConfig.isCompassEightDirections()
+                                    ? "8"
+                                    : "4")
                     )
             );
         }
@@ -413,7 +464,7 @@ public final class NavigationScreen extends Screen {
                 this.font,
                 Component.literal("WAYPOINTS"),
                 this.width / 2,
-                140,
+                165,
                 0xFFAAAAAA
         );
 
@@ -422,7 +473,7 @@ public final class NavigationScreen extends Screen {
                     this.font,
                     Component.literal("No waypoints created yet"),
                     this.width / 2,
-                    170,
+                    195,
                     0xFFAAAAAA
             );
         }

@@ -31,8 +31,11 @@ public final class NavigationClient {
         // Initialize native locator bar synchronization.
         NavigationLocatorSync.initialize();
 
-        // Initialize compass HUD.
+        // Initialize top compass.
         NavigationCompassRenderer.initialize();
+
+        // Initialize locator bar compass.
+        NavigationLocatorCompassRenderer.initialize();
 
         // Navigation screen key.
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
